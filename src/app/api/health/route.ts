@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET() {
   try {
+    // Import Prisma lazily so we can return a useful JSON error if the import fails
+    // (e.g. Prisma Client not generated in production).
+    const { prisma } = await import('@/lib/prisma')
+
     // Check database connectivity
     await prisma.$queryRaw`SELECT 1`
 
@@ -25,6 +28,16 @@ export async function GET() {
       Session: !!sessionTable?.session,
     }
 
+    const hasDatabaseUrl = !!process.env.DATABASE_URL
+    let databaseHost: string | null = null
+    try {
+      if (process.env.DATABASE_URL) {
+        databaseHost = new URL(process.env.DATABASE_URL).host
+      }
+    } catch {
+      databaseHost = null
+    }
+
     return NextResponse.json(
       {
         status: 'ok',
@@ -32,6 +45,11 @@ export async function GET() {
         uptime: process.uptime(),
         database: 'connected',
         tables,
+        env: {
+          hasDatabaseUrl,
+          databaseHost,
+          nodeEnv: process.env.NODE_ENV,
+        },
       },
       { status: 200 }
     )
@@ -43,6 +61,10 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         database: 'disconnected',
         error: error instanceof Error ? error.message : 'Unknown error',
+        env: {
+          hasDatabaseUrl: !!process.env.DATABASE_URL,
+          nodeEnv: process.env.NODE_ENV,
+        },
       },
       { status: 503 }
     )
