@@ -8,6 +8,20 @@ import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
+  // Enable verbose logs on Vercel when needed:
+  // set env NEXTAUTH_DEBUG="true"
+  debug: process.env.NEXTAUTH_DEBUG === 'true',
+  logger: {
+    error(code, metadata) {
+      console.error('[next-auth][error]', code, metadata)
+    },
+    warn(code) {
+      console.warn('[next-auth][warn]', code)
+    },
+    debug(code, metadata) {
+      console.log('[next-auth][debug]', code, metadata)
+    },
+  },
   session: {
     strategy: 'jwt',
   },
