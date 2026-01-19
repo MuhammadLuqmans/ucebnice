@@ -2,15 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 
+// This route depends on request cookies/headers (session),
+// so it must always be evaluated dynamically.
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * GET /api/admin/achievements
  * Get all achievements with unlock stats
  */
 export async function GET(request: NextRequest) {
-  const adminCheck = await requireAdmin()
-  if (adminCheck) return adminCheck
-
   try {
+    const adminCheck = await requireAdmin()
+    if (adminCheck) return adminCheck
+
     const achievements = await prisma.achievement.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
@@ -48,10 +53,10 @@ export async function GET(request: NextRequest) {
  * Create a new achievement
  */
 export async function POST(request: NextRequest) {
-  const adminCheck = await requireAdmin()
-  if (adminCheck) return adminCheck
-
   try {
+    const adminCheck = await requireAdmin()
+    if (adminCheck) return adminCheck
+
     const body = await request.json()
     const { badgeId, name, description, icon, xpReward, rarity } = body
 
