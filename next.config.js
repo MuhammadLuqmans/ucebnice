@@ -4,7 +4,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // On Vercel we should NOT use `output: 'standalone'`.
+  // Standalone relies on output-file-tracing and can miss Prisma runtime deps
+  // under pnpm, causing production errors like:
+  // "Cannot find module '@prisma/client-runtime-utils'"
+  ...(process.env.VERCEL ? {} : { output: 'standalone' }),
   reactStrictMode: true,
   swcMinify: true,
   eslint: {
