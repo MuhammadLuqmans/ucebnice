@@ -13,7 +13,8 @@ const pool =
   globalForPrisma.pool ??
   new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 20, // Maximum pool size
+    // Vercel/serverless: keep pools tiny to avoid exhausting DB connections
+    max: process.env.NODE_ENV === 'production' ? 2 : 20,
     idleTimeoutMillis: 30000, // Close idle connections after 30s
     connectionTimeoutMillis: 5000, // Match Prisma 6 default
   })
