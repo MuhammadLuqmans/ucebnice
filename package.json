@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "vercel-build": "prisma generate && npx prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -20,6 +21,7 @@
     "type-check": "tsc --noEmit",
     "analyze": "ANALYZE=true next build",
     "prepare": "husky",
+    "postinstall": "prisma generate",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "migrate:export": "tsx scripts/migration/export-sqlite-data.ts",
